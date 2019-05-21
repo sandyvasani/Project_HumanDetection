@@ -1,2 +1,17 @@
+<<<<<<< HEAD
+CHanges done by jagdish
+
+Again did some changes
+
+Changes done by sandip
+
+Again did some changes by sandip
+
+
+Hello All
+=======
 fsdfsdfsdfsfsdffdsfsdfsdfsfsf 
 gfgd
+>>>>>>> master
+
+All done
