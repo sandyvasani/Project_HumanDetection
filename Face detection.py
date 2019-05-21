@@ -11,7 +11,9 @@ import cv2
 # from a lot of positive(faces) and negative(non-faces) 
 # images. 
 face_cascade_ff = cv2.CascadeClassifier('haarcascade_frontalface_alt2.xml') 
-face_cascade_up = cv2.CascadeClassifier('haarcascade_profileface.xml') 
+face_cascade_sf = cv2.CascadeClassifier('haarcascade_profileface.xml')
+face_cascade_up = cv2.CascadeClassifier('haarcascade_upperbody.xml')
+face_cascade_lo = cv2.CascadeClassifier('haarcascade_lowerbody.xml') 
 # capture frames from a camera 
 cap = cv2.VideoCapture(2) 
   
@@ -27,18 +29,18 @@ def IOU_1(face1, face2):
 		return True
 	   
   
-def IOU(faces_ff, faces_up):
+def IOU(faces_ff, faces_sf):
     listToDel = []
     for idx1, face1 in enumerate(faces_ff):
-        for idx2, face2 in enumerate(faces_up):
+        for idx2, face2 in enumerate(faces_sf):
             result = IOU_1 (face1, face2)
             if result:
-                print (len(faces_up), idx2)
-                #faces_up.tolist().pop(idx2)
+                print (len(faces_sf), idx2)
+                #faces_sf.tolist().pop(idx2)
                 listToDel.append (idx2)
                 break
     sideFace = []        
-    for idx2, face2 in enumerate(faces_up):
+    for idx2, face2 in enumerate(faces_sf):
         if idx2 not in listToDel:
             sideFace.append (face2)
     return faces_ff, sideFace
@@ -75,15 +77,23 @@ while 1:
     
     #print (gray.shape)
   
-    # Detects faces of different sizes in the input image 
+    # Detects faces of different sizes in the input image
+    #For Front face 
     faces_ff = face_cascade_ff.detectMultiScale(gray, 1.3, 4) 
     
-    #faces_up = face_cascade_up.detectMultiScale(gray, 1.05, 4 , minSize=(150,150)) 
-    faces_up = face_cascade_up.detectMultiScale(gray, 1.05, 4)
-    if (len (faces_ff) and len(faces_up)):
-        print ("before : ", len(faces_ff), len(faces_up))
-        faces_ff, faces_up = IOU(faces_ff, faces_up)
-        print ("After  : ", len(faces_ff), len(faces_up))
+    #For Side face
+    faces_sf = face_cascade_sf.detectMultiScale(gray, 1.05, 4)
+    
+    #For Upper Body
+    faces_up = face_cascade_up.detectMultiScale(gray, 1.05, 4 , minSize=(150,150))
+    
+    #For Lower Body
+    faces_lo = face_cascade_lo.detectMultiScale(gray, 1.05, 4 , minSize=(150,150))
+    
+    if (len (faces_ff) and len(faces_sf)):
+        print ("before : ", len(faces_ff), len(faces_sf))
+        faces_ff, faces_sf = IOU(faces_ff, faces_sf)
+        print ("After  : ", len(faces_ff), len(faces_sf))
      
   	  
     for (x,y,w,h) in faces_ff: 
@@ -93,11 +103,22 @@ while 1:
         roi_color = img[y:y+h, x:x+w] 
   
     
-    for (x,y,w,h) in faces_up:
+    for (x,y,w,h) in faces_sf:
         cv2.rectangle(img,(x,y),(x+w,y+h),(0,255,255),2)  
         roi_gray = gray[y:y+h, x:x+w] 
         roi_color = img[y:y+h, x:x+w] 
-      
+    
+    for (x,y,w,h) in faces_up:
+        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,255),2)  
+        roi_gray = gray[y:y+h, x:x+w] 
+        roi_color = img[y:y+h, x:x+w]  
+    
+    for (x,y,w,h) in faces_lo:
+        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)  
+        roi_gray = gray[y:y+h, x:x+w] 
+        roi_color = img[y:y+h, x:x+w]  
+    
+         
     # Display an image in a window 
     cv2.imshow('img', img)
     cv2.imshow('fgmask', fgmask)
